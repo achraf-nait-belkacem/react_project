@@ -2,19 +2,27 @@ import React, { useState, useEffect } from 'react';
 import Card from './Card.jsx';
 import './GameBoard.css';
 
+// Import images directly
+import ananas from './assets/images/ananas.jpeg';
+import apple from './assets/images/apple.jpeg';
+import banana from './assets/images/banana.jpg';
+import kiwi from './assets/images/kiwi.jpg';
+import melon from './assets/images/melon.jpeg';
+import orange from './assets/images/orange.jpg';
+
 const GameBoard = () => {
   const [cards, setCards] = useState([]);
   const [flippedCards, setFlippedCards] = useState([]);
   const [matchedPairs, setMatchedPairs] = useState([]);
 
-  // Sample card data - you can replace images with your own
+  // Use imported images
   const cardImages = [
-    '/assets/images/ananas.jpeg',
-    '/assets/images/apple.jpeg',
-    '/assets/images/banana.jpg',
-    '/assets/images/kiwi.jpg',
-    '/assets/images/melon.jpeg',
-    '/assets/images/orange.jpg',
+    ananas,
+    apple,
+    banana,
+    kiwi,
+    melon,
+    orange
   ];
 
   // Initialize game
