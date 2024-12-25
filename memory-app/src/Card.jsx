@@ -1,4 +1,5 @@
 import React from 'react';
+import './Card.css';
 
 const Card = ({ id, isFlipped, imageUrl, onClick }) => {
   return (
@@ -9,11 +10,14 @@ const Card = ({ id, isFlipped, imageUrl, onClick }) => {
       <div className="card-inner">
         <div className="card-front">
           {/* Question mark or card back design */}
-          ?
+          <span>?</span>
         </div>
         <div className="card-back">
-          {/* Card image or content */}
-          <img src={imageUrl} alt="card" />
+          <img 
+            src={imageUrl} 
+            alt="card" 
+            loading="lazy"
+          />
         </div>
       </div>
     </div>
