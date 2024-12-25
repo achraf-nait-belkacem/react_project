@@ -9,12 +9,12 @@ const GameBoard = () => {
 
   // Sample card data - you can replace images with your own
   const cardImages = [
-    '/path/to/image1.jpg',
-    '/path/to/image2.jpg',
-    '/path/to/image3.jpg',
-    '/path/to/image4.jpg',
-    '/path/to/image5.jpg',
-    '/path/to/image6.jpg',
+    '/assets/images/ananas.jpeg',
+    '/assets/images/apple.jpeg',
+    '/assets/images/banana.jpg',
+    '/assets/images/kiwi.jpg',
+    '/assets/images/melon.jpeg',
+    '/assets/images/orange.jpg',
   ];
 
   // Initialize game
