@@ -1,24 +1,49 @@
-.game-board {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 20px;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+/* Dark theme colors */
+:root {
+  --bg-dark: #1a1a1a;
+  --bg-card: #2c2c2c;
+  --text-light: #ffffff;
+  --text-secondary: #b3b3b3;
+  --accent-color: #4ade80;
+  --error-color: #ff6b6b;
+  --success-color: #4cd964;
 }
 
-@media (min-width: 600px) {
-  .game-board {
-    grid-template-columns: repeat(4, 1fr);
-  }
+/* Add this to ensure the entire page is dark */
+body {
+  background-color: var(--bg-dark);
+  margin: 0;
+  min-height: 100vh;
 }
 
-/* Add some space around the game board */
 .game-container {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 30px;
+  padding: 20px;
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
+
+.scores-section {
+  width: 350px;
+  padding: 20px;
+  margin-top: 65px;
+}
+
+.game-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 20px;
+}
+
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .game-info {
@@ -26,12 +51,10 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 800px;
   padding: 15px 25px;
-  background-color: white;
+  background-color: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
 .score-display {
@@ -43,67 +66,132 @@
   margin: 0;
   font-size: 1.2em;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-light);
 }
 
 .score-value, .moves-value {
-  color: #e74c3c;
+  color: var(--accent-color);
+  font-weight: 700;
+}
+
+.errors-value {
+  color: var(--error-color);
   font-weight: 700;
 }
 
 .restart-button {
-  padding: 8px 16px;
-  background-color: #3498db;
-  color: white;
+  padding: 10px 20px;
+  background-color: var(--accent-color);
+  color: var(--bg-dark);
   border: none;
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .restart-button:hover {
-  background-color: #2980b9;
+  background-color: #2e8b57;
+  transform: translateY(-2px);
 }
 
-.game-complete-message {
-  background-color: rgba(255, 255, 255, 0.95);
-  padding: 20px 30px;
+/* Update high scores styling */
+.high-scores {
+  background-color: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 25px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  height: fit-content;
+  min-height: 500px;
+}
+
+.high-scores h2 {
+  color: var(--accent-color);
+  margin-bottom: 25px;
   text-align: center;
-  margin: 20px 0;
-  animation: slideIn 0.5s ease-out;
+  font-size: 1.8em;
 }
 
-.game-complete-message h2 {
-  color: #2c3e50;
+.scores-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.score-item {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 8px;
   margin-bottom: 10px;
-}
-
-.game-complete-message p {
-  color: #34495e;
-  margin: 5px 0;
+  transition: transform 0.2s ease;
   font-size: 1.1em;
 }
 
-@keyframes slideIn {
-  from {
-    transform: translateY(-20px);
-    opacity: 0;
+.score-item:hover {
+  transform: translateX(5px);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.score-rank {
+  font-size: 1.4em;
+}
+
+.score-details {
+  gap: 25px;
+}
+
+.game-complete-message {
+  background-color: var(--bg-card);
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  text-align: center;
+  animation: slideIn 0.5s ease-out;
+}
+
+.score-breakdown {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  text-align: left;
+}
+
+.bonus {
+  color: var(--success-color);
+  font-weight: bold;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .game-container {
+    grid-template-columns: 1fr;
   }
-  to {
-    transform: translateY(0);
-    opacity: 1;
+
+  .scores-section {
+    width: 100%;
+    order: 2;
+    margin-top: 20px;
+  }
+
+  .game-content {
+    order: 1;
+  }
+
+  .high-scores {
+    min-height: auto;
+    padding: 20px;
   }
 }
 
-/* Make sure mobile views look good */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .game-board {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .game-info {
     flex-direction: column;
     gap: 15px;
-    padding: 15px;
   }
 
   .score-display {
@@ -116,77 +204,8 @@
   }
 }
 
-/* Optional: Add a nice hover effect for cards */
-.card:hover .card-inner {
-  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-  transform: translateY(-2px);
-}
-
-/* Ensure consistent card sizing */
-@media (max-width: 599px) {
-  .game-board {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .game-board {
     grid-template-columns: repeat(2, 1fr);
   }
-}
-
-.saving-message {
-  color: #3498db;
-  font-style: italic;
-  margin: 10px 0;
-}
-
-.error-message {
-  color: #e74c3c;
-  background-color: #fde8e7;
-  padding: 10px;
-  border-radius: 6px;
-  margin: 10px 0;
-}
-
-.retry-button {
-  background-color: #e74c3c;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  margin-top: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.retry-button:hover {
-  background-color: #c0392b;
-}
-
-.retry-button:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-}
-
-.errors-value {
-  color: #e74c3c;
-  font-weight: 700;
-}
-
-.score-breakdown {
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 15px;
-  border-radius: 8px;
-  margin: 15px 0;
-  text-align: left;
-}
-
-.bonus {
-  color: #27ae60;
-  font-weight: bold;
-}
-
-.score-breakdown p {
-  margin: 5px 0;
 } 

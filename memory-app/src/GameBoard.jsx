@@ -202,59 +202,74 @@ const GameBoard = () => {
     }, 300);
   };
 
+  // Expose restart function to parent
+  useEffect(() => {
+    // Add the restart function to window so App component can access it
+    window.restartGame = handleRestart;
+    
+    return () => {
+      // Cleanup when component unmounts
+      delete window.restartGame;
+    };
+  }, []);
+
   return (
     <div className="game-container">
-      <div className="game-info">
-        <div className="score-display">
-          <p>Score: <span className="score-value">{score}</span></p>
-          <p>Moves: <span className="moves-value">{moves}</span></p>
-          <p>Errors: <span className="errors-value">{errors}</span></p>
-        </div>
-        <button className="restart-button" onClick={handleRestart}>
-          Restart Game
-        </button>
+      <div className="scores-section">
+        <HighScores scores={highScores} />
       </div>
-
-      {isGameComplete && (
-        <div className="game-complete-message">
-          <h2>Congratulations! 🎉</h2>
-          <p>Final Score: {score}</p>
-          <div className="score-breakdown">
-            <p>Total Moves: {moves}</p>
-            <p>Errors Made: {errors}</p>
-            <p>Time: {Math.floor((new Date() - startTime) / 1000)}s</p>
-            {errors === 0 && <p className="bonus">Perfect Game Bonus! +200</p>}
-            {moves <= cards.length && <p className="bonus">Efficiency Bonus! +300</p>}
+      
+      <div className="game-content">
+        <div className="game-info">
+          <div className="score-display">
+            <p>Score: <span className="score-value">{score}</span></p>
+            <p>Moves: <span className="moves-value">{moves}</span></p>
+            <p>Errors: <span className="errors-value">{errors}</span></p>
           </div>
-          {isSaving && <p className="saving-message">Saving score...</p>}
-          {saveError && (
-            <div className="error-message">
-              <p>{saveError}</p>
-              <button 
-                className="retry-button" 
-                onClick={handleGameOver}
-                disabled={isSaving}
-              >
-                Retry Save
-              </button>
-            </div>
-          )}
+          <button className="restart-button" onClick={handleRestart}>
+            Restart Game
+          </button>
         </div>
-      )}
 
-      <div className="game-board">
-        {cards.map(card => (
-          <Card
-            key={card.id}
-            id={card.id}
-            imageUrl={card.imageUrl}
-            isFlipped={flippedCards.includes(card.id) || matchedPairs.includes(card.id)}
-            onClick={() => handleCardClick(card)}
-          />
-        ))}
+        {isGameComplete && (
+          <div className="game-complete-message">
+            <h2>Congratulations! 🎉</h2>
+            <p>Final Score: {score}</p>
+            <div className="score-breakdown">
+              <p>Total Moves: {moves}</p>
+              <p>Errors Made: {errors}</p>
+              <p>Time: {Math.floor((new Date() - startTime) / 1000)}s</p>
+              {errors === 0 && <p className="bonus">Perfect Game Bonus! +200</p>}
+              {moves <= cards.length && <p className="bonus">Efficiency Bonus! +300</p>}
+            </div>
+            {isSaving && <p className="saving-message">Saving score...</p>}
+            {saveError && (
+              <div className="error-message">
+                <p>{saveError}</p>
+                <button 
+                  className="retry-button" 
+                  onClick={handleGameOver}
+                  disabled={isSaving}
+                >
+                  Retry Save
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="game-board">
+          {cards.map(card => (
+            <Card
+              key={card.id}
+              id={card.id}
+              imageUrl={card.imageUrl}
+              isFlipped={flippedCards.includes(card.id) || matchedPairs.includes(card.id)}
+              onClick={() => handleCardClick(card)}
+            />
+          ))}
+        </div>
       </div>
-
-      <HighScores scores={highScores} />
     </div>
   );
 };
