@@ -19,6 +19,8 @@ const GameBoard = () => {
   const [matchedPairs, setMatchedPairs] = useState([]);
   const [score, setScore] = useState(0);
   const [moves, setMoves] = useState(0);
+  const [errors, setErrors] = useState(0);
+  const [startTime, setStartTime] = useState(null);
   const [isGameComplete, setIsGameComplete] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
@@ -51,6 +53,8 @@ const GameBoard = () => {
     setCards(cardPairs);
     setScore(0);
     setMoves(0);
+    setErrors(0);
+    setStartTime(new Date());
     setFlippedCards([]);
     setMatchedPairs([]);
     setIsGameComplete(false);
@@ -126,6 +130,45 @@ const GameBoard = () => {
     }
   };
 
+  const calculateScore = (moves, errors, timeInSeconds) => {
+    // Base score for completing the game
+    const baseScore = 1000;
+    
+    // Penalty for each move (-5 points per move)
+    const movePenalty = moves * 5;
+    
+    // Higher penalty for errors (-20 points per error)
+    const errorPenalty = errors * 20;
+    
+    // Time penalty (-1 point per second after first 30 seconds)
+    const timeThreshold = 30; // seconds
+    const timePenalty = Math.max(0, timeInSeconds - timeThreshold);
+    
+    // Calculate bonus for quick completion
+    const speedBonus = timeInSeconds < timeThreshold ? 
+      Math.floor((timeThreshold - timeInSeconds) * 10) : 0;
+    
+    // Perfect game bonus (no errors)
+    const perfectGameBonus = errors === 0 ? 200 : 0;
+    
+    // Efficiency bonus (minimum moves possible is pairs * 2)
+    const minimumMoves = cards.length;
+    const efficiencyBonus = moves <= minimumMoves ? 300 : 
+      moves <= minimumMoves * 1.5 ? 150 : 0;
+
+    const finalScore = Math.max(0,
+      baseScore 
+      - movePenalty 
+      - errorPenalty 
+      - timePenalty 
+      + speedBonus 
+      + perfectGameBonus 
+      + efficiencyBonus
+    );
+
+    return Math.round(finalScore);
+  };
+
   const checkMatch = (newFlippedCards) => {
     const [firstCard, secondCard] = newFlippedCards.map(id => 
       cards.find(card => card.id === id)
@@ -135,13 +178,18 @@ const GameBoard = () => {
       const newMatchedPairs = [...matchedPairs, firstCard.id, secondCard.id];
       setMatchedPairs(newMatchedPairs);
       setFlippedCards([]);
-      setScore(prevScore => prevScore + 10);
 
       // Check if all cards are matched
       if (newMatchedPairs.length === cards.length) {
+        const endTime = new Date();
+        const timeInSeconds = Math.floor((endTime - startTime) / 1000);
+        const finalScore = calculateScore(moves, errors, timeInSeconds);
+        setScore(finalScore);
         handleGameOver();
       }
     } else {
+      // Increment error count for mismatches
+      setErrors(prev => prev + 1);
       setTimeout(() => {
         setFlippedCards([]);
       }, 1000);
@@ -160,6 +208,7 @@ const GameBoard = () => {
         <div className="score-display">
           <p>Score: <span className="score-value">{score}</span></p>
           <p>Moves: <span className="moves-value">{moves}</span></p>
+          <p>Errors: <span className="errors-value">{errors}</span></p>
         </div>
         <button className="restart-button" onClick={handleRestart}>
           Restart Game
@@ -169,8 +218,14 @@ const GameBoard = () => {
       {isGameComplete && (
         <div className="game-complete-message">
           <h2>Congratulations! 🎉</h2>
-          <p>You completed the game in {moves} moves</p>
           <p>Final Score: {score}</p>
+          <div className="score-breakdown">
+            <p>Total Moves: {moves}</p>
+            <p>Errors Made: {errors}</p>
+            <p>Time: {Math.floor((new Date() - startTime) / 1000)}s</p>
+            {errors === 0 && <p className="bonus">Perfect Game Bonus! +200</p>}
+            {moves <= cards.length && <p className="bonus">Efficiency Bonus! +300</p>}
+          </div>
           {isSaving && <p className="saving-message">Saving score...</p>}
           {saveError && (
             <div className="error-message">

@@ -167,4 +167,26 @@
 .retry-button:disabled {
   background-color: #bdc3c7;
   cursor: not-allowed;
+}
+
+.errors-value {
+  color: #e74c3c;
+  font-weight: 700;
+}
+
+.score-breakdown {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  text-align: left;
+}
+
+.bonus {
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.score-breakdown p {
+  margin: 5px 0;
 } 
