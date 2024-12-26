@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 
 const app = express();
 const port = 3000;
@@ -31,6 +32,10 @@ const db = new sqlite3.Database('./scores.db', (err) => {
 });
 
 // Routes
+app.get('/', (req, res) => {
+  res.json({ message: 'Memory Game API is running' });
+});
+
 app.get('/api/scores', (req, res) => {
   db.all(
     'SELECT * FROM scores ORDER BY score DESC, moves ASC LIMIT 5',

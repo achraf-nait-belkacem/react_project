@@ -11,6 +11,8 @@ import kiwi from './assets/images/kiwi.jpg';
 import melon from './assets/images/melon.jpeg';
 import orange from './assets/images/orange.jpg';
 
+const API_URL = 'http://localhost:3000/api';
+
 const GameBoard = () => {
   const [cards, setCards] = useState([]);
   const [flippedCards, setFlippedCards] = useState([]);
@@ -56,13 +58,12 @@ const GameBoard = () => {
 
   const fetchHighScores = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/scores');
+      const response = await fetch(`${API_URL}/scores`);
       if (!response.ok) {
         throw new Error('Failed to fetch high scores');
       }
       const data = await response.json();
-      // Assuming the scores are already sorted by the server
-      setHighScores(data.slice(0, 5)); // Show top 5 scores
+      setHighScores(data.slice(0, 5));
     } catch (error) {
       console.error('Error fetching high scores:', error);
     }
@@ -89,7 +90,6 @@ const GameBoard = () => {
   const handleGameOver = async () => {
     setIsGameComplete(true);
     
-    // Calculate final statistics
     const finalStats = {
       score: score,
       moves: moves,
@@ -98,12 +98,11 @@ const GameBoard = () => {
       totalPairs: cards.length / 2,
     };
 
-    // Save the score
     try {
       setIsSaving(true);
       setSaveError(null);
 
-      const response = await fetch('http://localhost:3000/api/scores', {
+      const response = await fetch(`${API_URL}/scores`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +118,6 @@ const GameBoard = () => {
       console.log('Score saved successfully:', data);
       setIsSaving(false);
       
-      // Fetch updated high scores after saving new score
       fetchHighScores();
     } catch (error) {
       console.error('Error saving score:', error);
