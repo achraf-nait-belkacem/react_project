@@ -14,6 +14,9 @@ const GameBoard = () => {
   const [cards, setCards] = useState([]);
   const [flippedCards, setFlippedCards] = useState([]);
   const [matchedPairs, setMatchedPairs] = useState([]);
+  const [score, setScore] = useState(0);
+  const [moves, setMoves] = useState(0);
+  const [isGameComplete, setIsGameComplete] = useState(false);
 
   // Use imported images
   const cardImages = [
@@ -25,13 +28,11 @@ const GameBoard = () => {
     orange
   ];
 
-  // Initialize game
   useEffect(() => {
     initializeCards();
   }, []);
 
   const initializeCards = () => {
-    // Create pairs of cards and shuffle them
     const cardPairs = [...cardImages, ...cardImages]
       .map((image, index) => ({
         id: index,
@@ -41,10 +42,14 @@ const GameBoard = () => {
       .sort(() => Math.random() - 0.5);
 
     setCards(cardPairs);
+    setScore(0);
+    setMoves(0);
+    setFlippedCards([]);
+    setMatchedPairs([]);
+    setIsGameComplete(false);
   };
 
   const handleCardClick = (clickedCard) => {
-    // Prevent clicking same card or when two cards are already flipped
     if (
       flippedCards.length === 2 ||
       flippedCards.includes(clickedCard.id) ||
@@ -56,36 +61,96 @@ const GameBoard = () => {
     const newFlippedCards = [...flippedCards, clickedCard.id];
     setFlippedCards(newFlippedCards);
 
-    // Check for match when two cards are flipped
     if (newFlippedCards.length === 2) {
-      const [firstCard, secondCard] = newFlippedCards.map(id => 
-        cards.find(card => card.id === id)
-      );
-
-      if (firstCard.imageUrl === secondCard.imageUrl) {
-        // Match found
-        setMatchedPairs([...matchedPairs, firstCard.id, secondCard.id]);
-        setFlippedCards([]);
-      } else {
-        // No match - flip cards back after delay
-        setTimeout(() => {
-          setFlippedCards([]);
-        }, 1000);
-      }
+      setMoves(prevMoves => prevMoves + 1);
+      checkMatch(newFlippedCards);
     }
   };
 
+  const checkMatch = (newFlippedCards) => {
+    const [firstCard, secondCard] = newFlippedCards.map(id => 
+      cards.find(card => card.id === id)
+    );
+
+    if (firstCard.imageUrl === secondCard.imageUrl) {
+      setMatchedPairs([...matchedPairs, firstCard.id, secondCard.id]);
+      setFlippedCards([]);
+      setScore(prevScore => prevScore + 10);
+
+      // Check if game is complete
+      if (matchedPairs.length + 2 === cards.length) {
+        setIsGameComplete(true);
+        saveScore();
+      }
+    } else {
+      setTimeout(() => {
+        setFlippedCards([]);
+      }, 1000);
+    }
+  };
+
+  const saveScore = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/scores', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          score: score,
+          moves: moves,
+          timestamp: new Date().toISOString()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save score');
+      }
+
+      const data = await response.json();
+      console.log('Score saved successfully:', data);
+    } catch (error) {
+      console.error('Error saving score:', error);
+    }
+  };
+
+  const handleRestart = () => {
+    setTimeout(() => {
+      initializeCards();
+    }, 300);
+  };
+
   return (
-    <div className="game-board">
-      {cards.map(card => (
-        <Card
-          key={card.id}
-          id={card.id}
-          imageUrl={card.imageUrl}
-          isFlipped={flippedCards.includes(card.id) || matchedPairs.includes(card.id)}
-          onClick={() => handleCardClick(card)}
-        />
-      ))}
+    <div className="game-container">
+      <div className="game-info">
+        <div className="score-display">
+          <p>Score: <span className="score-value">{score}</span></p>
+          <p>Moves: <span className="moves-value">{moves}</span></p>
+        </div>
+        <button className="restart-button" onClick={handleRestart}>
+          Restart Game
+        </button>
+      </div>
+
+      {isGameComplete && (
+        <div className="game-complete-message">
+          <h2>Congratulations! 🎉</h2>
+          <p>You completed the game in {moves} moves</p>
+          <p>Final Score: {score}</p>
+        </div>
+      )}
+
+      <div className="game-board">
+        {cards.map(card => (
+          <Card
+            key={card.id}
+            id={card.id}
+            imageUrl={card.imageUrl}
+            isFlipped={flippedCards.includes(card.id) || matchedPairs.includes(card.id)}
+            onClick={() => handleCardClick(card)}
+          />
+        ))}
+      </div>
     </div>
   );
 };
