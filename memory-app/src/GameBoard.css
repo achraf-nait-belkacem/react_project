@@ -15,9 +15,105 @@
 
 /* Add some space around the game board */
 .game-container {
-  background-color: #f0f2f5;
-  min-height: 100vh;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.game-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  padding: 15px 25px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.score-display {
+  display: flex;
+  gap: 20px;
+}
+
+.score-display p {
+  margin: 0;
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.score-value, .moves-value {
+  color: #e74c3c;
+  font-weight: 700;
+}
+
+.restart-button {
+  padding: 8px 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.restart-button:hover {
+  background-color: #2980b9;
+}
+
+.game-complete-message {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  text-align: center;
+  margin: 20px 0;
+  animation: slideIn 0.5s ease-out;
+}
+
+.game-complete-message h2 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.game-complete-message p {
+  color: #34495e;
+  margin: 5px 0;
+  font-size: 1.1em;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Make sure mobile views look good */
+@media (max-width: 600px) {
+  .game-info {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .score-display {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .restart-button {
+    width: 100%;
+  }
 }
 
 /* Optional: Add a nice hover effect for cards */
