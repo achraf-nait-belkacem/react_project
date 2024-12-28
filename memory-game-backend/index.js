@@ -1,6 +1,6 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const sqlite3 = require('sqlite3').verbose();
+//const express = require('express');
+//const bodyParser = require('body-parser');
+//const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 const db = new sqlite3.Database(':memory:'); // In-memory database for simplicity
