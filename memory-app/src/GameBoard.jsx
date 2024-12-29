@@ -25,6 +25,8 @@ const GameBoard = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [highScores, setHighScores] = useState([]);
+  const [playerName, setPlayerName] = useState('');
+  const [nameError, setNameError] = useState('');
 
   // Use imported images
   const cardImages = [
@@ -94,7 +96,13 @@ const GameBoard = () => {
   const handleGameOver = async () => {
     setIsGameComplete(true);
     
+    if (!playerName.trim()) {
+      setNameError('Please enter your name');
+      return;
+    }
+
     const finalStats = {
+      playerName: playerName.trim(),
       score: score,
       moves: moves,
       timeCompleted: new Date().toISOString(),
@@ -241,6 +249,20 @@ const GameBoard = () => {
               <p>Time: {Math.floor((new Date() - startTime) / 1000)}s</p>
               {errors === 0 && <p className="bonus">Perfect Game Bonus! +200</p>}
               {moves <= cards.length && <p className="bonus">Efficiency Bonus! +300</p>}
+            </div>
+            <div className="name-input-section">
+              <input
+                type="text"
+                value={playerName}
+                onChange={(e) => {
+                  setPlayerName(e.target.value);
+                  setNameError('');
+                }}
+                placeholder="Enter your name"
+                maxLength={20}
+                className={nameError ? 'error' : ''}
+              />
+              {nameError && <p className="error-message">{nameError}</p>}
             </div>
             {isSaving && <p className="saving-message">Saving score...</p>}
             {saveError && (
