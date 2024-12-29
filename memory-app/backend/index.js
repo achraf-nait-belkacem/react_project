@@ -1,8 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const { MongoClient } = require('mongodb');
+require('dotenv').config();
 
 const app = express();
 const port = 3000;
@@ -11,73 +11,86 @@ const port = 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Create SQLite database connection
-const db = new sqlite3.Database('./scores.db', (err) => {
-  if (err) {
-    console.error('Error opening database:', err);
-  } else {
-    console.log('Connected to SQLite database');
-    // Create scores table if it doesn't exist
-    db.run(`
-      CREATE TABLE IF NOT EXISTS scores (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        score INTEGER NOT NULL,
-        moves INTEGER NOT NULL,
-        timeCompleted TEXT NOT NULL,
-        matchedPairs INTEGER,
-        totalPairs INTEGER
-      )
-    `);
+// MongoDB connection
+const uri = process.env.MONGODB_URI;
+const client = new MongoClient(uri);
+
+let db;
+
+async function connectToDb() {
+  try {
+    await client.connect();
+    db = client.db('memory_game');
+    console.log('Connected to MongoDB');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+    process.exit(1);
   }
-});
+}
 
 // Routes
 app.get('/', (req, res) => {
   res.json({ message: 'Memory Game API is running' });
 });
 
-app.get('/api/scores', (req, res) => {
-  db.all(
-    'SELECT * FROM scores ORDER BY score DESC, moves ASC LIMIT 5',
-    [],
-    (err, rows) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      res.json(rows);
-    }
-  );
+app.get('/api/scores', async (req, res) => {
+  try {
+    const scores = await db
+      .collection('scores')
+      .find({})
+      .sort({ score: -1, moves: 1 })
+      .limit(5)
+      .toArray();
+    
+    res.json(scores);
+  } catch (error) {
+    console.error('Error fetching scores:', error);
+    res.status(500).json({ error: 'Failed to fetch scores' });
+  }
 });
 
-app.post('/api/scores', (req, res) => {
+app.post('/api/scores', async (req, res) => {
   const { score, moves, timeCompleted, matchedPairs, totalPairs } = req.body;
   
-  db.run(
-    `INSERT INTO scores (score, moves, timeCompleted, matchedPairs, totalPairs)
-     VALUES (?, ?, ?, ?, ?)`,
-    [score, moves, timeCompleted, matchedPairs, totalPairs],
-    function(err) {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      res.json({
-        id: this.lastID,
-        message: 'Score saved successfully'
-      });
-    }
-  );
+  try {
+    const result = await db.collection('scores').insertOne({
+      score,
+      moves,
+      timeCompleted,
+      matchedPairs,
+      totalPairs,
+      createdAt: new Date()
+    });
+
+    res.json({
+      id: result.insertedId,
+      message: 'Score saved successfully'
+    });
+  } catch (error) {
+    console.error('Error saving score:', error);
+    res.status(500).json({ error: 'Failed to save score' });
+  }
 });
 
-// Serve static files from the React app
-app.use(express.static('../memory-app/dist'));
+// Start server after connecting to MongoDB
+async function startServer() {
+  await connectToDb();
+  
+  app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+  });
+}
 
-// Handle React routing, return all requests to React app
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../memory-app/dist', 'index.html'));
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+  try {
+    await client.close();
+    console.log('MongoDB connection closed');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error closing MongoDB connection:', error);
+    process.exit(1);
+  }
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-}); 
+startServer().catch(console.error); 
