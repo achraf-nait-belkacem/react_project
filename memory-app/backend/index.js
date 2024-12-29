@@ -28,6 +28,42 @@ async function connectToDb() {
   }
 }
 
+// Add validation middleware
+const validateScore = (req, res, next) => {
+  const { playerName, score, moves, timeCompleted, matchedPairs, totalPairs } = req.body;
+
+  // Validate player name
+  if (!playerName || typeof playerName !== 'string' || playerName.trim().length === 0) {
+    return res.status(400).json({ error: 'Valid player name is required' });
+  }
+
+  if (playerName.trim().length > 20) {
+    return res.status(400).json({ error: 'Player name must be 20 characters or less' });
+  }
+
+  // Validate score
+  if (typeof score !== 'number' || score < 0) {
+    return res.status(400).json({ error: 'Valid score is required' });
+  }
+
+  // Validate moves
+  if (typeof moves !== 'number' || moves < 1) {
+    return res.status(400).json({ error: 'Valid number of moves is required' });
+  }
+
+  // Validate matched pairs
+  if (typeof matchedPairs !== 'number' || matchedPairs < 0) {
+    return res.status(400).json({ error: 'Valid matched pairs count is required' });
+  }
+
+  // Validate time completed
+  if (!timeCompleted || !Date.parse(timeCompleted)) {
+    return res.status(400).json({ error: 'Valid completion time is required' });
+  }
+
+  next();
+};
+
 // Routes
 app.get('/', (req, res) => {
   res.json({ message: 'Memory Game API is running' });
@@ -49,11 +85,12 @@ app.get('/api/scores', async (req, res) => {
   }
 });
 
-app.post('/api/scores', async (req, res) => {
-  const { score, moves, timeCompleted, matchedPairs, totalPairs } = req.body;
+app.post('/api/scores', validateScore, async (req, res) => {
+  const { playerName, score, moves, timeCompleted, matchedPairs, totalPairs } = req.body;
   
   try {
     const result = await db.collection('scores').insertOne({
+      playerName: playerName.trim(),
       score,
       moves,
       timeCompleted,
