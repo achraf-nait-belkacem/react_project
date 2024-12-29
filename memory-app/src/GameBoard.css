@@ -208,4 +208,34 @@ body {
   .game-board {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+.name-input-section {
+  margin: 20px 0;
+}
+
+.name-input-section input {
+  padding: 10px 15px;
+  border: 2px solid var(--accent-color);
+  border-radius: 6px;
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  font-size: 1.1em;
+  width: 100%;
+  max-width: 300px;
+}
+
+.name-input-section input.error {
+  border-color: var(--error-color);
+}
+
+.name-input-section input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
+}
+
+.error-message {
+  color: var(--error-color);
+  font-size: 0.9em;
+  margin-top: 5px;
 } 
