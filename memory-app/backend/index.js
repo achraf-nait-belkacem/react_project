@@ -1,8 +1,13 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const { MongoClient } = require('mongodb');
-require('dotenv').config();
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import { MongoClient } from 'mongodb';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Initialize dotenv
+dotenv.config();
 
 const app = express();
 const port = 3000;
