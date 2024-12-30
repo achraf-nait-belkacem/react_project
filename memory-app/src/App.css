@@ -3,6 +3,8 @@
   min-height: 100vh;
   background-color: var(--bg-dark);
   color: var(--text-light);
+  display: flex;
+  flex-direction: column;
 }
 
 .app-header {
@@ -27,10 +29,39 @@
 }
 
 .app-main {
+  flex: 1;
   padding: 20px;
 }
 
 .app-footer {
   padding: 20px;
-  color: #666;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.2); /* Darker background */
+  margin-top: auto;
+  border-top: 1px solid rgba(74, 222, 128, 0.1); /* Subtle green border */
+}
+
+.app-footer p {
+  margin: 5px 0;
+  color: var(--accent-color); /* Same green as restart button */
+  font-size: 0.9em;
+}
+
+.author-name {
+  color: var(--accent-color);
+  font-weight: 600;
+  transition: color 0.3s ease;
+  text-decoration: none; /* Remove default underline */
+  display: inline-block; /* Enable transform on hover */
+}
+
+.author-name:hover {
+  color: #2e8b57; /* Same dark green as restart button hover */
+  transform: translateY(-1px); /* Slight lift effect */
+}
+
+.copyright {
+  font-size: 0.8em;
+  color: var(--accent-color);
+  opacity: 0.8;
 }
