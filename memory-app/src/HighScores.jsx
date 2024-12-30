@@ -9,13 +9,15 @@ const HighScores = ({ scores }) => {
         {scores.length > 0 ? (
           scores.map((score, index) => (
             <div key={index} className="score-item">
-              <div className="score-rank">#{index + 1}</div>
-              <div className="score-details">
-                <span className="score-points">{score.score} pts</span>
-                <span className="score-moves">{score.moves} moves</span>
-                <span className="score-date">
-                  {new Date(score.timeCompleted).toLocaleDateString()}
-                </span>
+              <div className="score-main">
+                <div className="score-rank">#{index + 1}</div>
+                <div className="score-info">
+                  <span className="score-name">{score.playerName}</span>
+                  <span className="score-points">{score.score} pts</span>
+                </div>
+              </div>
+              <div className="score-date">
+                {new Date(score.timeCompleted).toLocaleDateString()}
               </div>
             </div>
           ))
