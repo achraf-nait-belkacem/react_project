@@ -18,7 +18,18 @@ function App() {
         <GameBoard />
       </main>
       <footer className="app-footer">
-        <p>Match the cards to win!</p>
+        <p>
+          Powered by{' '}
+          <a 
+            href="https://github.com/achraf-nait-belkacem"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="author-name"
+          >
+            NAIT BELKACEM Achraf
+          </a>
+        </p>
+        <p className="copyright">© 2024-2025</p>
       </footer>
     </div>
   );
