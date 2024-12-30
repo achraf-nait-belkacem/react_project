@@ -27,6 +27,8 @@ const GameBoard = () => {
   const [highScores, setHighScores] = useState([]);
   const [playerName, setPlayerName] = useState('');
   const [nameError, setNameError] = useState('');
+  const [showNameInput, setShowNameInput] = useState(false);
+  const [showGameComplete, setShowGameComplete] = useState(false);
 
   // Use imported images
   const cardImages = [
@@ -193,10 +195,9 @@ const GameBoard = () => {
         const timeInSeconds = Math.floor((endTime - startTime) / 1000);
         const finalScore = calculateScore(moves, errors, timeInSeconds);
         setScore(finalScore);
-        handleGameOver();
+        setShowNameInput(true); // Show name input first
       }
     } else {
-      // Increment error count for mismatches
       setErrors(prev => prev + 1);
       setTimeout(() => {
         setFlippedCards([]);
@@ -208,6 +209,16 @@ const GameBoard = () => {
     setTimeout(() => {
       initializeCards();
     }, 300);
+  };
+
+  const handleSubmitName = () => {
+    if (!playerName.trim()) {
+      setNameError('Please enter your name');
+      return;
+    }
+    setShowNameInput(false);
+    setShowGameComplete(true);
+    handleGameOver();
   };
 
   // Expose restart function to parent
@@ -239,9 +250,40 @@ const GameBoard = () => {
           </button>
         </div>
 
-        {isGameComplete && (
+        {showNameInput && (
+          <div className="name-input-modal">
+            <div className="modal-content">
+              <h2>Congratulations! 🎉</h2>
+              <p>You've completed the game!</p>
+              <p>Score: {score}</p>
+              <div className="name-input-section">
+                <input
+                  type="text"
+                  value={playerName}
+                  onChange={(e) => {
+                    setPlayerName(e.target.value);
+                    setNameError('');
+                  }}
+                  placeholder="Enter your name"
+                  maxLength={20}
+                  className={nameError ? 'error' : ''}
+                />
+                {nameError && <p className="error-message">{nameError}</p>}
+                <button 
+                  className="submit-button"
+                  onClick={handleSubmitName}
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showGameComplete && (
           <div className="game-complete-message">
-            <h2>Congratulations! 🎉</h2>
+            <h2>Game Results</h2>
+            <p>Player: {playerName}</p>
             <p>Final Score: {score}</p>
             <div className="score-breakdown">
               <p>Total Moves: {moves}</p>
@@ -249,20 +291,6 @@ const GameBoard = () => {
               <p>Time: {Math.floor((new Date() - startTime) / 1000)}s</p>
               {errors === 0 && <p className="bonus">Perfect Game Bonus! +200</p>}
               {moves <= cards.length && <p className="bonus">Efficiency Bonus! +300</p>}
-            </div>
-            <div className="name-input-section">
-              <input
-                type="text"
-                value={playerName}
-                onChange={(e) => {
-                  setPlayerName(e.target.value);
-                  setNameError('');
-                }}
-                placeholder="Enter your name"
-                maxLength={20}
-                className={nameError ? 'error' : ''}
-              />
-              {nameError && <p className="error-message">{nameError}</p>}
             </div>
             {isSaving && <p className="saving-message">Saving score...</p>}
             {saveError && (
