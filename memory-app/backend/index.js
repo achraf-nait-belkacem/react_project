@@ -5,6 +5,8 @@ import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import mongoose from 'mongoose';
+import User from './models/user.js';
 
 // Initialize dotenv
 dotenv.config();
@@ -15,6 +17,7 @@ const port = 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.json());
 
 // MongoDB connection
 const uri = process.env.MONGODB_URI;
@@ -136,3 +139,87 @@ process.on('SIGINT', async () => {
 });
 
 startServer().catch(console.error); 
+
+const connectToDb = async () => {
+  try {
+    await mongoose.connect('mongodb+srv://achrafoonb:azeQSD147-@cluster0.rtwak.mongodb.net/memory_game', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('Connected to MongoDB');
+  } catch (err) {
+    console.error('Error connecting to MongoDB:', err);
+  }
+};
+
+connectToDb();
+
+const addUser = async () => {
+  try {
+    const newUser = new User({
+      id: '1',
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+      highScore: 100,
+    });
+
+    const savedUser = await newUser.save();
+    console.log('User added:', savedUser);
+  } catch (err) {
+    console.error('Error adding user:', err);
+  }
+};
+
+addUser();
+
+const fetchUsers = async () => {
+  try {
+    const users = await User.find();
+    console.log('Users:', users);
+  } catch (err) {
+    console.error('Error fetching users:', err);
+  }
+};
+
+fetchUsers();
+
+const updateHighScore = async (email, newHighScore) => {
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { email: email },
+      { highScore: newHighScore },
+      { new: true }
+    );
+    console.log('Updated user:', updatedUser);
+  } catch (err) {
+    console.error('Error updating user:', err);
+  }
+};
+
+updateHighScore('john.doe@example.com', 200);
+
+app.post("/signup", async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Create a new user
+    const newUser = new User({ name, email, password });
+    await newUser.save();
+
+    res.status(201).json({ message: "User created successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
