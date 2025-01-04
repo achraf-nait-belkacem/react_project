@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Card from './Card.jsx';
 import HighScores from './HighScores.jsx';
 import './GameBoard.css';
+import { useAuth } from './context/AuthContext';
 
 // Import images directly
 import ananas from './assets/images/ananas.jpeg';
@@ -24,11 +25,8 @@ const GameBoard = () => {
   const [isGameComplete, setIsGameComplete] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
-  const [highScores, setHighScores] = useState([]);
-  const [playerName, setPlayerName] = useState('');
-  const [nameError, setNameError] = useState('');
-  const [showNameInput, setShowNameInput] = useState(false);
   const [showGameComplete, setShowGameComplete] = useState(false);
+  const { user } = useAuth();
 
   // Use imported images
   const cardImages = [
@@ -62,6 +60,7 @@ const GameBoard = () => {
     setFlippedCards([]);
     setMatchedPairs([]);
     setIsGameComplete(false);
+    setShowGameComplete(false);
   };
 
   const fetchHighScores = async () => {
@@ -95,47 +94,41 @@ const GameBoard = () => {
     }
   };
 
-  const handleGameOver = async () => {
-    setIsGameComplete(true);
+  const handleGameOver = async (finalScore) => {
+    if (!user) return;
     
-    if (!playerName.trim()) {
-      setNameError('Please enter your name');
-      return;
-    }
-
-    const finalStats = {
-      playerName: playerName.trim(),
-      score: score,
-      moves: moves,
-      timeCompleted: new Date().toISOString(),
-      matchedPairs: matchedPairs.length / 2,
-      totalPairs: cards.length / 2,
-    };
+    setIsSaving(true);
+    setSaveError(null);
 
     try {
-      setIsSaving(true);
-      setSaveError(null);
-
-      const response = await fetch(`${API_URL}/scores`, {
-        method: 'POST',
+      console.log('Updating high score for:', user.email, 'Score:', finalScore);
+      
+      // Update user's high score if current score is higher
+      const response = await fetch(`http://localhost:3000/api/users/${user.email}/highscore`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(finalStats),
+        body: JSON.stringify({ score: finalScore }),
       });
 
       if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
+        throw new Error('Failed to update high score');
       }
 
       const data = await response.json();
-      console.log('Score saved successfully:', data);
-      setIsSaving(false);
+      console.log('High score update response:', data);
+
+      setIsGameComplete(true);
       
-      fetchHighScores();
+      // Trigger parent component to refresh high scores
+      if (window.refreshHighScores) {
+        window.refreshHighScores();
+      }
     } catch (error) {
       console.error('Error saving score:', error);
       setSaveError('Failed to save score. Please try again.');
+    } finally {
       setIsSaving(false);
     }
   };
@@ -195,7 +188,8 @@ const GameBoard = () => {
         const timeInSeconds = Math.floor((endTime - startTime) / 1000);
         const finalScore = calculateScore(moves, errors, timeInSeconds);
         setScore(finalScore);
-        setShowNameInput(true); // Show name input first
+        setShowGameComplete(true);
+        handleGameOver(finalScore);
       }
     } else {
       setErrors(prev => prev + 1);
@@ -206,19 +200,14 @@ const GameBoard = () => {
   };
 
   const handleRestart = () => {
+    // Hide game results first
+    setShowGameComplete(false);
+    setIsSaving(false);
+    setSaveError(null);
+    
     setTimeout(() => {
       initializeCards();
     }, 300);
-  };
-
-  const handleSubmitName = () => {
-    if (!playerName.trim()) {
-      setNameError('Please enter your name');
-      return;
-    }
-    setShowNameInput(false);
-    setShowGameComplete(true);
-    handleGameOver();
   };
 
   // Expose restart function to parent
@@ -235,7 +224,7 @@ const GameBoard = () => {
   return (
     <div className="game-container">
       <div className="scores-section">
-        <HighScores scores={highScores} />
+        <HighScores />
       </div>
       
       <div className="game-content">
@@ -250,40 +239,10 @@ const GameBoard = () => {
           </button>
         </div>
 
-        {showNameInput && (
-          <div className="name-input-modal">
-            <div className="modal-content">
-              <h2>Congratulations! 🎉</h2>
-              <p>You've completed the game!</p>
-              <p>Score: {score}</p>
-              <div className="name-input-section">
-                <input
-                  type="text"
-                  value={playerName}
-                  onChange={(e) => {
-                    setPlayerName(e.target.value);
-                    setNameError('');
-                  }}
-                  placeholder="Enter your name"
-                  maxLength={20}
-                  className={nameError ? 'error' : ''}
-                />
-                {nameError && <p className="error-message">{nameError}</p>}
-                <button 
-                  className="submit-button"
-                  onClick={handleSubmitName}
-                >
-                  Continue
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {showGameComplete && (
           <div className="game-complete-message">
             <h2>Game Results</h2>
-            <p>Player: {playerName}</p>
+            <p>Player: {user.name}</p>
             <p>Final Score: {score}</p>
             <div className="score-breakdown">
               <p>Total Moves: {moves}</p>
@@ -298,7 +257,7 @@ const GameBoard = () => {
                 <p>{saveError}</p>
                 <button 
                   className="retry-button" 
-                  onClick={handleGameOver}
+                  onClick={() => handleGameOver(score)}
                   disabled={isSaving}
                 >
                   Retry Save

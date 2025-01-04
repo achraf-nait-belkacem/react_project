@@ -210,38 +210,28 @@ body {
   }
 }
 
-.name-input-section {
-  margin: 20px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.name-input-section input {
-  padding: 10px 15px;
-  border: 2px solid var(--accent-color);
+.submit-button {
+  padding: 10px 20px;
+  background-color: var(--accent-color);
+  color: var(--bg-dark);
+  border: none;
   border-radius: 6px;
-  background-color: var(--bg-dark);
-  color: var(--text-light);
-  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
   width: 100%;
   max-width: 300px;
 }
 
-.name-input-section input.error {
-  border-color: var(--error-color);
+.submit-button:hover {
+  background-color: #2e8b57;
+  transform: translateY(-2px);
 }
 
-.name-input-section input:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
-}
-
-.error-message {
-  color: var(--error-color);
-  font-size: 0.9em;
-  margin-top: 5px;
+.submit-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .submit-button {
@@ -268,38 +258,50 @@ body {
   transform: none;
 }
 
-.name-input-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+.submit-button {
+  padding: 10px 20px;
+  background-color: var(--accent-color);
+  color: var(--bg-dark);
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 300px;
 }
 
-.modal-content {
-  background-color: var(--bg-card);
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  max-width: 400px;
-  width: 90%;
-  text-align: center;
+.submit-button:hover {
+  background-color: #2e8b57;
+  transform: translateY(-2px);
 }
 
-.modal-content h2 {
-  color: var(--accent-color);
-  margin-bottom: 15px;
+.submit-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.modal-content p {
-  margin-bottom: 15px;
+.submit-button {
+  padding: 10px 20px;
+  background-color: var(--accent-color);
+  color: var(--bg-dark);
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 300px;
 }
 
-.modal-content .name-input-section {
-  margin-top: 20px;
+.submit-button:hover {
+  background-color: #2e8b57;
+  transform: translateY(-2px);
+}
+
+.submit-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+  transform: none;
 } 

@@ -1,101 +1,78 @@
 .high-scores {
   background-color: var(--bg-card);
+  padding: 1.5rem;
   border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-  height: fit-content;
-  min-height: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 300px;
 }
 
 .high-scores h2 {
   color: var(--accent-color);
-  margin-bottom: 25px;
   text-align: center;
-  font-size: 1.8em;
-  font-weight: bold;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
 }
 
-.scores-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+.high-scores ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .score-item {
-  background-color: rgba(0, 0, 0, 0.2);
-  padding: 15px 20px;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 30px 1fr 80px;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  background-color: rgba(74, 222, 128, 0.1);
   transition: transform 0.2s ease;
 }
 
 .score-item:hover {
   transform: translateX(5px);
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(74, 222, 128, 0.15);
 }
 
-.score-main {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.score-rank {
+.rank {
   color: var(--accent-color);
-  font-size: 1.4em;
   font-weight: bold;
-  min-width: 40px;
+  text-align: center;
 }
 
-.score-info {
-  flex-grow: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-}
-
-.score-name {
+.player-name {
   color: var(--text-light);
-  font-weight: 600;
+  margin: 0 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.score-points {
+.score-value {
   color: var(--accent-color);
   font-weight: bold;
-}
-
-.score-date {
-  color: var(--text-secondary);
-  font-size: 0.85em;
   text-align: right;
-  padding-right: 40px;
-  opacity: 0.8;
 }
 
 .no-scores {
   text-align: center;
   color: var(--text-secondary);
   font-style: italic;
-  padding: 20px;
 }
 
-@media (max-width: 600px) {
-  .score-info {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
-  
-  .score-date {
-    padding-right: 0;
-    text-align: left;
-    padding-left: 55px;
-  }
-  
-  .score-item {
-    padding: 12px 15px;
-  }
+.error {
+  color: #ff4444;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Animation for new high scores */
+@keyframes highlight {
+  0% { background-color: rgba(74, 222, 128, 0.3); }
+  100% { background-color: rgba(74, 222, 128, 0.1); }
+}
+
+.score-item.new {
+  animation: highlight 2s ease-out;
 } 
