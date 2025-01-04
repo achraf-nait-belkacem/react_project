@@ -1,0 +1,80 @@
+.auth-page {
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+}
+
+.login-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-container h2 {
+  color: var(--accent-color);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid var(--accent-color);
+  border-radius: 6px;
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
+}
+
+.login-container button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--accent-color);
+  color: var(--bg-dark);
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-container button:hover {
+  background-color: #2e8b57;
+  transform: translateY(-2px);
+}
+
+.error {
+  color: #ff4444;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: 15px;
+  color: var(--text-secondary);
+}
+
+.link {
+  color: var(--accent-color);
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.link:hover {
+  color: #2e8b57;
+  text-decoration: underline;
+}
