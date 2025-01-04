@@ -1,40 +1,36 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { MongoClient } from 'mongodb';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import User from './models/user.js';
 
 // Initialize dotenv
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+
+// CORS configuration
+app.use(cors({
+  origin: 'http://localhost:5173', // Add your frontend URL
+  credentials: true
+}));
 
 // Middleware
-app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
 // MongoDB connection
-const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri);
-
-let db;
-
-async function connectToDb() {
-  try {
-    await client.connect();
-    db = client.db('memory_game');
-    console.log('Connected to MongoDB');
-  } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
-    process.exit(1);
-  }
-}
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch((error) => {
+  console.error('Error connecting to MongoDB:', error);
+  process.exit(1);
+});
 
 // Add validation middleware
 const validateScore = (req, res, next) => {
@@ -79,7 +75,7 @@ app.get('/', (req, res) => {
 
 app.get('/api/scores', async (req, res) => {
   try {
-    const scores = await db
+    const scores = await mongoose.connection.db
       .collection('scores')
       .find({})
       .sort({ score: -1, moves: 1 })
@@ -97,7 +93,7 @@ app.post('/api/scores', validateScore, async (req, res) => {
   const { playerName, score, moves, timeCompleted, matchedPairs, totalPairs } = req.body;
   
   try {
-    const result = await db.collection('scores').insertOne({
+    const result = await mongoose.connection.db.collection('scores').insertOne({
       playerName: playerName.trim(),
       score,
       moves,
@@ -117,109 +113,179 @@ app.post('/api/scores', validateScore, async (req, res) => {
   }
 });
 
-// Start server after connecting to MongoDB
-async function startServer() {
-  await connectToDb();
-  
-  app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-  });
-}
-
-// Handle graceful shutdown
-process.on('SIGINT', async () => {
-  try {
-    await client.close();
-    console.log('MongoDB connection closed');
-    process.exit(0);
-  } catch (error) {
-    console.error('Error closing MongoDB connection:', error);
-    process.exit(1);
-  }
-});
-
-startServer().catch(console.error); 
-
-const connectToDb = async () => {
-  try {
-    await mongoose.connect('mongodb+srv://achrafoonb:azeQSD147-@cluster0.rtwak.mongodb.net/memory_game', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('Connected to MongoDB');
-  } catch (err) {
-    console.error('Error connecting to MongoDB:', err);
-  }
-};
-
-connectToDb();
-
-const addUser = async () => {
-  try {
-    const newUser = new User({
-      id: '1',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      highScore: 100,
-    });
-
-    const savedUser = await newUser.save();
-    console.log('User added:', savedUser);
-  } catch (err) {
-    console.error('Error adding user:', err);
-  }
-};
-
-addUser();
-
-const fetchUsers = async () => {
-  try {
-    const users = await User.find();
-    console.log('Users:', users);
-  } catch (err) {
-    console.error('Error fetching users:', err);
-  }
-};
-
-fetchUsers();
-
-const updateHighScore = async (email, newHighScore) => {
-  try {
-    const updatedUser = await User.findOneAndUpdate(
-      { email: email },
-      { highScore: newHighScore },
-      { new: true }
-    );
-    console.log('Updated user:', updatedUser);
-  } catch (err) {
-    console.error('Error updating user:', err);
-  }
-};
-
-updateHighScore('john.doe@example.com', 200);
-
 app.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
+    // Validate input
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ message: "Email already registered" });
     }
 
     // Create a new user
-    const newUser = new User({ name, email, password });
-    await newUser.save();
+    const newUser = new User({
+      name,
+      email,
+      password, // In a real app, you should hash the password
+      highScore: 0
+    });
 
-    res.status(201).json({ message: "User created successfully" });
+    await newUser.save();
+    console.log('New user created:', { name, email });
+
+    res.status(201).json({ 
+      message: "User created successfully",
+      user: {
+        name: newUser.name,
+        email: newUser.email
+      }
+    });
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Add login route
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    console.log('Login attempt with:', { email, password });
+
+    // Validate input
+    if (!email || !password) {
+      console.log('Missing email or password');
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email });
+    console.log('User found:', user ? 'Yes' : 'No');
+    
+    if (!user) {
+      console.log('User not found for email:', email);
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Check password
+    console.log('Comparing passwords:', {
+      provided: password,
+      stored: user.password
+    });
+    
+    if (user.password !== password) {
+      console.log('Password mismatch for user:', email);
+      return res.status(400).json({ message: "Invalid password" });
+    }
+
+    // Login successful
+    console.log('Login successful for:', email);
+    res.json({
+      message: "Login successful",
+      token: "dummy-token",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        highScore: user.highScore
+      }
+    });
+  } catch (error) {
+    console.error('Login error details:', error);
+    res.status(500).json({ 
+      message: "Server error",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// Get user's high score
+app.get("/api/users/:email/highscore", async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.params.email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ highScore: user.highScore });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+// Update user's high score
+app.put("/api/users/:email/highscore", async (req, res) => {
+  const { score } = req.body;
+
+  try {
+    console.log('Updating high score:', { email: req.params.email, score });
+
+    const user = await User.findOne({ email: req.params.email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Only update if new score is higher
+    if (score > user.highScore) {
+      user.highScore = score;
+      await user.save();
+      console.log('Updated high score for user:', { email: user.email, newScore: score });
+    }
+
+    res.json({ 
+      message: "High score updated successfully",
+      highScore: user.highScore 
+    });
+  } catch (error) {
+    console.error('Error updating high score:', error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Get leaderboard (only highest score per user)
+app.get("/api/leaderboard", async (req, res) => {
+  try {
+    // Get all users with their high scores
+    const topPlayers = await User.find({ highScore: { $gt: 0 } })  // Only get users with scores
+      .select('name email highScore')
+      .sort({ highScore: -1 })
+      .limit(10);
+
+    console.log('Found top players:', topPlayers);
+
+    // Format the response
+    const formattedTopPlayers = topPlayers.map(player => ({
+      name: player.name,
+      score: player.highScore
+    }));
+
+    res.json(formattedTopPlayers);
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Start server
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
+
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+  try {
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error closing MongoDB connection:', error);
+    process.exit(1);
+  }
 });
