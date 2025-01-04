@@ -1,14 +1,30 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Home from './components/Home';
 import GameBoard from './GameBoard';
 import Footer from './components/Footer';
-import './App.css';
 import Signup from "./components/signup.jsx";
+import Login from './components/login';
+import './App.css';
 
-// Create a separate header component to use navigation
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
 const GameHeader = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <header className="app-header">
@@ -16,52 +32,62 @@ const GameHeader = () => {
         Memory Game
       </h1>
       <div className="auth-buttons">
-        <button 
-          className="auth-button login-button"
-          onClick={() => navigate('/login')}
-        >
-          Login
-        </button>
-        <button 
-          className="auth-button signup-button"
-          onClick={() => navigate('/signup')}
-        >
-          Sign Up
-        </button>
+        {user ? (
+          <>
+            <span className="user-info">Welcome, {user.name}</span>
+            <button 
+              className="auth-button login-button"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <button 
+              className="auth-button login-button"
+              onClick={() => navigate('/login')}
+            >
+              Login
+            </button>
+            <button 
+              className="auth-button signup-button"
+              onClick={() => navigate('/signup')}
+            >
+              Sign Up
+            </button>
+          </>
+        )}
       </div>
     </header>
   );
 };
 
-const App = () => {
+function App() {
   return (
-    <Router>
-      <nav>
-        <Link to="/signup">
-          <button>Signup</button>
-        </Link>
-      </nav>
-
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<div>Login Page (Coming Soon)</div>} />
-        <Route path="/signup" element={<Signup />} />
-        <Route
-          path="/game"
-          element={
-            <>
-              <GameHeader />
-              <main className="app-main">
-                <GameBoard />
-              </main>
-              <Footer />
-            </>
-          }
-        />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="app">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/game" element={
+              <ProtectedRoute>
+                <>
+                  <GameHeader />
+                  <main className="app-main">
+                    <GameBoard />
+                  </main>
+                  <Footer />
+                </>
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
-};
-
+}
 
 export default App;
